@@ -9,6 +9,7 @@ import (
 	"github.com/sagernet/sing-box/option"
 	"github.com/sagernet/sing-dns"
 	E "github.com/sagernet/sing/common/exceptions"
+	M "github.com/sagernet/sing/common/metadata"
 
 	"github.com/v2fly/v2ray-core/v5/common/protocol"
 	"github.com/v2fly/v2ray-core/v5/common/serial"
@@ -32,7 +33,7 @@ import (
 //go:linkname outboundConfigLoader github.com/v2fly/v2ray-core/v5/infra/conf/v4.outboundConfigLoader
 var outboundConfigLoader *loader.JSONConfigLoader
 
-func migrateOutbound(outboundConfig v4json.OutboundDetourConfig) (option.Outbound, error) {
+func migrateOutbound(outboundConfig v4json.OutboundDetourConfig, dnsRule *option.DefaultDNSRule) (option.Outbound, error) {
 	var outbound option.Outbound
 	outbound.Tag = outboundConfig.Tag
 
@@ -125,6 +126,7 @@ func migrateOutbound(outboundConfig v4json.OutboundDetourConfig) (option.Outboun
 			outbound.HTTPOptions.TLS = &tlsOptions
 		}
 		serverAddress, users := parseServerAddress(proxyType.Server)
+		addServerToDNSOptions(serverAddress, dnsRule)
 		outbound.HTTPOptions.Server = serverAddress.AddrString()
 		outbound.HTTPOptions.ServerPort = serverAddress.Port
 		for _, user := range users {
@@ -147,6 +149,7 @@ func migrateOutbound(outboundConfig v4json.OutboundDetourConfig) (option.Outboun
 			outbound.SocksOptions.Version = "4a"
 		}
 		serverAddress, users := parseServerAddress(proxyType.Server)
+		addServerToDNSOptions(serverAddress, dnsRule)
 		outbound.SocksOptions.Server = serverAddress.AddrString()
 		outbound.SocksOptions.ServerPort = serverAddress.Port
 		for _, user := range users {
@@ -163,6 +166,7 @@ func migrateOutbound(outboundConfig v4json.OutboundDetourConfig) (option.Outboun
 	case *shadowsocks.ClientConfig:
 		outbound.Type = C.TypeShadowsocks
 		serverAddress, users := parseServerAddress(proxyType.Server)
+		addServerToDNSOptions(serverAddress, dnsRule)
 		outbound.ShadowsocksOptions.Server = serverAddress.AddrString()
 		outbound.ShadowsocksOptions.ServerPort = serverAddress.Port
 		for _, user := range users {
@@ -197,6 +201,7 @@ func migrateOutbound(outboundConfig v4json.OutboundDetourConfig) (option.Outboun
 			outbound.TrojanOptions.Transport = &transportOptions
 		}
 		serverAddress, users := parseServerAddress(proxyType.Server)
+		addServerToDNSOptions(serverAddress, dnsRule)
 		outbound.TrojanOptions.Server = serverAddress.AddrString()
 		outbound.TrojanOptions.ServerPort = serverAddress.Port
 		for _, user := range users {
@@ -218,6 +223,7 @@ func migrateOutbound(outboundConfig v4json.OutboundDetourConfig) (option.Outboun
 			outbound.VMessOptions.Transport = &transportOptions
 		}
 		serverAddress, users := parseServerAddress(proxyType.Receiver)
+		addServerToDNSOptions(serverAddress, dnsRule)
 		outbound.VMessOptions.Server = serverAddress.AddrString()
 		outbound.VMessOptions.ServerPort = serverAddress.Port
 		for _, user := range users {
@@ -255,6 +261,7 @@ func migrateOutbound(outboundConfig v4json.OutboundDetourConfig) (option.Outboun
 			outbound.VLESSOptions.Transport = &transportOptions
 		}
 		serverAddress, users := parseServerAddress(proxyType.Vnext)
+		addServerToDNSOptions(serverAddress, dnsRule)
 		outbound.VLESSOptions.Server = serverAddress.AddrString()
 		outbound.VLESSOptions.ServerPort = serverAddress.Port
 		for _, user := range users {
@@ -272,4 +279,10 @@ func migrateOutbound(outboundConfig v4json.OutboundDetourConfig) (option.Outboun
 		return option.Outbound{}, E.New("unknown outbound type: ", reflect.TypeOf(proxyType))
 	}
 	return outbound, nil
+}
+
+func addServerToDNSOptions(address M.Socksaddr, dnsRule *option.DefaultDNSRule) {
+	if address.IsFqdn() {
+		dnsRule.Domain = append(dnsRule.Domain, address.Fqdn)
+	}
 }

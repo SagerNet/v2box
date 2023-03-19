@@ -4,7 +4,9 @@ import (
 	"bytes"
 
 	"github.com/sagernet/sing-box/common/json"
+	C "github.com/sagernet/sing-box/constant"
 	"github.com/sagernet/sing-box/option"
+	"github.com/sagernet/sing/common"
 	"github.com/sagernet/sing/common/format"
 	"github.com/sagernet/sing/common/logger"
 
@@ -19,11 +21,12 @@ func Migrate(content []byte, logger logger.Logger) (option.Options, error) {
 	if err != nil {
 		return option.Options{}, err
 	}
-	if v2rayConfig.LogConfig != nil && v2rayConfig.LogConfig.ErrorLog != "" || v2rayConfig.LogConfig.LogLevel != "" {
+	if logConfig := v2rayConfig.LogConfig; logConfig != nil && logConfig.ErrorLog != "" || logConfig.LogLevel != "" {
 		options.Log = &option.LogOptions{}
-		options.Log.Output = v2rayConfig.LogConfig.ErrorLog
-		options.Log.Level = v2rayConfig.LogConfig.LogLevel
+		options.Log.Output = logConfig.ErrorLog
+		options.Log.Level = logConfig.LogLevel
 	}
+	migrateDNS(common.PtrValueOrDefault(v2rayConfig.DNSConfig), &options)
 	for i, inboundConfig := range v2rayConfig.InboundConfigs {
 		inbound, err := migrateInbound(inboundConfig)
 		if err != nil {
@@ -36,8 +39,14 @@ func Migrate(content []byte, logger logger.Logger) (option.Options, error) {
 		}
 		options.Inbounds = append(options.Inbounds, inbound)
 	}
+	outboundServerRule := option.DNSRule{
+		Type: C.RuleTypeDefault,
+		DefaultOptions: option.DefaultDNSRule{
+			Server: "local",
+		},
+	}
 	for i, outboundConfig := range v2rayConfig.OutboundConfigs {
-		outbound, err := migrateOutbound(outboundConfig)
+		outbound, err := migrateOutbound(outboundConfig, &outboundServerRule.DefaultOptions)
 		if err != nil {
 			tag := outboundConfig.Tag
 			if tag == "" {
@@ -47,6 +56,9 @@ func Migrate(content []byte, logger logger.Logger) (option.Options, error) {
 			continue
 		}
 		options.Outbounds = append(options.Outbounds, outbound)
+	}
+	if len(outboundServerRule.DefaultOptions.Domain) > 0 {
+		options.DNS.Rules = append(options.DNS.Rules, outboundServerRule)
 	}
 	if routerConfig := v2rayConfig.RouterConfig; routerConfig != nil {
 		for _, ruleMessage := range routerConfig.RuleList {

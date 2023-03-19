@@ -11,4 +11,5 @@ Migrate your v2ray configuration into sing-box.
 - [x] Inbound
 - [x] Outbound
 - [x] Routing Rule
-- [ ] DNS
+- [x] DNS
+- [ ] Support other projects
