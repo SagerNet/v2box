@@ -44,7 +44,7 @@ func Run(path string) error {
 	if err != nil {
 		return err
 	}
-	encoder := json.NewEncoder(os.Stderr)
+	encoder := json.NewEncoder(os.Stdout)
 	encoder.SetIndent("", "  ")
 	return encoder.Encode(options)
 }
