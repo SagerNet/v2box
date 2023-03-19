@@ -1,0 +1,9 @@
+/.idea/
+/vendor/
+/*.json
+/site/
+/bin/
+/dist/
+/v2box
+/v2box.exe
+.DS_Store
