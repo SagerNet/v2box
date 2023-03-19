@@ -19,7 +19,7 @@ type RawFieldRule struct {
 	Domains    option.Listable[string] `json:"domains"`
 	IP         option.Listable[string] `json:"ip"`
 	Port       *cfgcommon.PortList     `json:"port"`
-	Network    option.NetworkList      `json:"network"`
+	Network    *cfgcommon.NetworkList  `json:"network"`
 	SourceIP   option.Listable[string] `json:"source"`
 	SourcePort *cfgcommon.PortList     `json:"sourcePort"`
 	User       option.Listable[string] `json:"user"`
@@ -89,12 +89,7 @@ func migrateRule(ruleMessage json.RawMessage) (option.Rule, error) {
 			}
 		}
 	}
-	if len(field.Network) > 0 {
-		networkList := field.Network.Build()
-		if len(networkList) == 1 {
-			rule.Network = networkList[0]
-		}
-	}
+	rule.Network = parseNetworkList(field.Network)
 	rule.AuthUser = field.User
 	rule.Inbound = field.InboundTag
 	rule.Protocol = field.Protocols

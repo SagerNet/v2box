@@ -10,6 +10,7 @@ import (
 
 	v2ray_net "github.com/v2fly/v2ray-core/v5/common/net"
 	"github.com/v2fly/v2ray-core/v5/common/protocol"
+	"github.com/v2fly/v2ray-core/v5/infra/conf/cfgcommon"
 	v4json "github.com/v2fly/v2ray-core/v5/infra/conf/v4"
 )
 
@@ -18,6 +19,25 @@ func parseServerAddress(servers []*protocol.ServerEndpoint) (M.Socksaddr, []*pro
 		return M.Socksaddr{}, nil
 	}
 	return M.ParseSocksaddrHostPort(servers[0].Address.AsAddress().String(), uint16(servers[0].Port)), servers[0].User
+}
+
+func parseNetworkList(networks *cfgcommon.NetworkList) string {
+	if networks == nil {
+		return ""
+	}
+	networkList := networks.Build()
+	networkList = common.Filter(networkList, func(it v2ray_net.Network) bool {
+		return it == v2ray_net.Network_TCP || it == v2ray_net.Network_UDP
+	})
+	if len(networkList) == 1 {
+		switch networkList[0] {
+		case v2ray_net.Network_TCP:
+			return N.NetworkTCP
+		case v2ray_net.Network_UDP:
+			return N.NetworkUDP
+		}
+	}
+	return ""
 }
 
 func parseNetworks(networks []v2ray_net.Network) string {
