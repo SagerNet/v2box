@@ -1,45 +1,51 @@
-package v2box
+package main
 
 import (
-	"encoding/json"
 	"io"
 	"os"
 
+	"github.com/sagernet/sing-box/common/json"
 	"github.com/sagernet/sing-box/log"
+	"github.com/sagernet/sing-box/option"
 	E "github.com/sagernet/sing/common/exceptions"
-	"github.com/sagernet/v2box/v2rayjson"
+	"github.com/sagernet/v2box"
 
 	"github.com/spf13/cobra"
 )
 
-var Command = &cobra.Command{
-	Use:   "v2ray2box",
+var commandMigrate = &cobra.Command{
+	Use:   "migrate",
 	Short: "Migrate your v2ray configuration into sing-box.",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := Run(args[0])
+		err := migrate()
 		if err != nil {
 			log.Fatal(err)
 		}
 	},
 }
 
-func Run(path string) error {
+func init() {
+	command.AddCommand(commandMigrate)
+}
+
+func migrate() error {
 	var (
+		options option.Options
 		content []byte
 		err     error
 	)
-	if path == "stdin" {
+	if configPath == "stdin" {
 		content, err = io.ReadAll(os.Stdin)
 	} else {
-		content, err = os.ReadFile(path)
+		content, err = os.ReadFile(configPath)
 	}
 	if err != nil {
-		return E.Cause(err, "read v2ray config")
+		return E.Cause(err, "read config")
 	}
-	options, err := v2rayjson.Migrate(content, log.StdLogger())
+	options, err = v2box.Migrate(configType, content, log.StdLogger())
 	if err != nil {
-		return E.Cause(err, "load v2ray config")
+		return E.Cause(err, "load config")
 	}
 	if err != nil {
 		return err

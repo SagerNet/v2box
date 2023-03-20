@@ -1,7 +1,8 @@
-package v2rayjson
+package xrayjson
 
 import (
 	"bytes"
+	"strings"
 
 	"github.com/sagernet/sing-box/common/json"
 	C "github.com/sagernet/sing-box/constant"
@@ -9,24 +10,24 @@ import (
 	"github.com/sagernet/sing/common"
 	"github.com/sagernet/sing/common/format"
 	"github.com/sagernet/sing/common/logger"
+	"github.com/sagernet/v2box"
 
-	v4json "github.com/v2fly/v2ray-core/v5/infra/conf/v4"
+	"github.com/xtls/xray-core/core"
+	"github.com/xtls/xray-core/infra/conf"
 )
+
+func init() {
+	v2box.Register("xray", strings.Join(core.VersionStatement(), "\n"), Migrate)
+}
 
 func Migrate(content []byte, logger logger.Logger) (option.Options, error) {
 	var options option.Options
-	var v2rayConfig v4json.Config
+	var v2rayConfig conf.Config
 	decoder := json.NewDecoder(json.NewCommentFilter(bytes.NewReader(content)))
 	err := decoder.Decode(&v2rayConfig)
 	if err != nil {
 		return option.Options{}, err
 	}
-	if logConfig := v2rayConfig.LogConfig; logConfig != nil && logConfig.ErrorLog != "" || logConfig.LogLevel != "" {
-		options.Log = &option.LogOptions{}
-		options.Log.Output = logConfig.ErrorLog
-		options.Log.Level = logConfig.LogLevel
-	}
-	migrateDNS(common.PtrValueOrDefault(v2rayConfig.DNSConfig), &options)
 	for i, inboundConfig := range v2rayConfig.InboundConfigs {
 		inbound, err := migrateInbound(inboundConfig)
 		if err != nil {
@@ -57,6 +58,7 @@ func Migrate(content []byte, logger logger.Logger) (option.Options, error) {
 		}
 		options.Outbounds = append(options.Outbounds, outbound)
 	}
+	migrateDNS(common.PtrValueOrDefault(v2rayConfig.DNSConfig), &options)
 	if len(outboundServerRule.DefaultOptions.Domain) > 0 {
 		options.DNS.Rules = append(options.DNS.Rules, outboundServerRule)
 	}

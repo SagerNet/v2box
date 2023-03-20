@@ -29,7 +29,7 @@ func migrateDNS(dnsConfig conf_dns.DNSConfig, options *option.Options) {
 	dnsOptions.Strategy = parseStrategy(dnsConfig.QueryStrategy)
 	dnsOptions.Servers = []option.DNSServerOptions{
 		{
-			Address: "tls://1.1.1.1",
+			Address: "tls://8.8.8.8",
 			Tag:     "remote",
 		},
 		{

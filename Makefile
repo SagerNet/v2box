@@ -1,5 +1,5 @@
 NAME = v2box
-PARAMS = -v -trimpath -tags "$(TAGS)" -ldflags "-s -w -buildid="
+PARAMS = -v -trimpath -tags "$(TAGS)" -ldflags "-X google.golang.org/protobuf/reflect/protoregistry.conflictPolicy=ignore -s -w -buildid="
 MAIN = ./cmd/v2box
 PREFIX ?= $(shell go env GOPATH)
 

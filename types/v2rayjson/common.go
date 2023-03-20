@@ -102,9 +102,11 @@ func parseTransport(streamSettings *v4json.StreamConfig) (option.V2RayTransportO
 			transportOptions.WebsocketOptions.MaxEarlyData = uint32(wsSettings.MaxEarlyData)
 			transportOptions.WebsocketOptions.EarlyDataHeaderName = wsSettings.EarlyDataHeaderName
 		}
-	case "grpc":
+	case "grpc", "gun":
 		transportOptions.Type = C.V2RayTransportTypeGRPC
 		if grpcSettings := streamSettings.GRPCSettings; grpcSettings != nil {
+			transportOptions.GRPCOptions.ServiceName = grpcSettings.ServiceName
+		} else if grpcSettings := streamSettings.GunSettings; grpcSettings != nil {
 			transportOptions.GRPCOptions.ServiceName = grpcSettings.ServiceName
 		}
 	case "quic":
