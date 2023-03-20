@@ -3,6 +3,7 @@ module github.com/sagernet/v2box
 go 1.20
 
 require (
+	github.com/maxmind/mmdbwriter v0.0.0-20230315153935-be21eaf06f90
 	github.com/sagernet/sing v0.2.1-0.20230318094614-4bbf5f2c3046
 	github.com/sagernet/sing-box v1.1.6-0.20230319124622-e717852c73a9
 	github.com/sagernet/sing-dns v0.1.4
