@@ -10,6 +10,7 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/v2fly/v2ray-core/v5 v5.4.0
 	github.com/xtls/xray-core v1.8.1-0.20230320070138-172f353bd7fa
+	google.golang.org/protobuf v1.30.0
 )
 
 require (
@@ -19,7 +20,7 @@ require (
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/caddyserver/certmagic v0.17.2 // indirect
-	github.com/cloudflare/circl v1.2.1-0.20221019164342-6ab4dfed8f3c // indirect
+	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/cretz/bine v0.2.0 // indirect
 	github.com/dgryski/go-metro v0.0.0-20211217172704-adc40b04c140 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -100,7 +101,6 @@ require (
 	golang.org/x/tools v0.7.0 // indirect
 	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4 // indirect
 	google.golang.org/grpc v1.53.0 // indirect
-	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gvisor.dev/gvisor v0.0.0-20220901235040-6ca97ef2ce1c // indirect
 	lukechampine.com/blake3 v1.1.7 // indirect
