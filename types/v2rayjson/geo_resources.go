@@ -42,7 +42,7 @@ func MigrateGeoIP(input []byte, output io.Writer) error {
 				IP:   ipAddress,
 				Mask: net.CIDRMask(int(cidrEntry.Prefix), len(ipAddress)*8),
 			}
-			err = writer.Insert(ipNet, mmdbtype.String(geoipEntry.CountryCode))
+			err = writer.Insert(ipNet, mmdbtype.String(strings.ToLower(geoipEntry.CountryCode)))
 			if err != nil {
 				return err
 			}
